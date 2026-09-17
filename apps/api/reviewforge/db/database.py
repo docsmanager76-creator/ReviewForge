@@ -49,3 +49,20 @@ def get_connection(db_path: Path) -> sqlite3.Connection:
 def init_schema(conn: sqlite3.Connection) -> None:
     conn.executescript(SCHEMA)
     conn.commit()
+    _migrate_job_table(conn)
+
+
+def _migrate_job_table(conn: sqlite3.Connection) -> None:
+    """Phase 1 adds progress-reporting columns to `job`. CREATE TABLE IF NOT EXISTS above
+    leaves an existing app.db untouched, so add any missing columns here rather than requiring
+    users to delete their database."""
+    existing_columns = {row["name"] for row in conn.execute("PRAGMA table_info(job)")}
+    migrations = {
+        "stage": "ALTER TABLE job ADD COLUMN stage TEXT",
+        "progress": "ALTER TABLE job ADD COLUMN progress INTEGER NOT NULL DEFAULT 0",
+        "result": "ALTER TABLE job ADD COLUMN result TEXT",
+    }
+    for column, statement in migrations.items():
+        if column not in existing_columns:
+            conn.execute(statement)
+    conn.commit()

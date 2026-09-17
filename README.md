@@ -34,7 +34,10 @@ See [`docs/architecture.md`](docs/architecture.md) for the full design and
 
 ## Status
 
-**Phase 0 complete.** The foundation (repo layout, local API, local dashboard, timeline
-schema, a working Remotion test render, FFmpeg detection) is in place. No AI pipeline steps
-(transcription, sentence analysis, visual planning, asset search/ranking) are implemented
-yet — see `docs/architecture.md` for the phased roadmap.
+**Phase 0 and Phase 1 complete.** The foundation (repo layout, local API, local dashboard,
+timeline schema, a working Remotion test render, FFmpeg detection) is in place, and voice +
+script intelligence works end-to-end: local Whisper transcription, script sentence parsing,
+deterministic script↔Whisper alignment, and timestamp validation, producing
+`work/transcript.json` and `work/sentences.json`. LLM-based sentence understanding, visual
+planning, and asset search/ranking are not implemented yet — see `docs/architecture.md` for
+the phased roadmap.

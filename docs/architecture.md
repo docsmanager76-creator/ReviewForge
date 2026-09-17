@@ -131,9 +131,13 @@ sentence analysis → visual matching → Timeline JSON → Remotion render → 
 
 ## Phased roadmap
 
-0. **Scaffolding** (this phase) — repo layout, local API + UI, timeline schema, a working
-   Remotion test render, FFmpeg detection.
-1. **Content understanding** — Whisper integration, script-aligned sentence segmentation.
+0. **Scaffolding** (done) — repo layout, local API + UI, timeline schema, a working Remotion
+   test render, FFmpeg detection.
+1. **Content understanding — voice + script intelligence** (done) — local Whisper
+   transcription, script sentence parsing, deterministic script↔Whisper alignment
+   (`apps/api/reviewforge/pipeline/`), timestamp validation, `work/transcript.json` +
+   `work/sentences.json`. Sentence-level LLM understanding (contentType, topic, visualIntent,
+   etc.) is deliberately deferred to Phase 2 — Phase 1 leaves those fields `null`.
 2. **Visual planning** — LLM call producing `VisualIntent` per sentence (structured JSON
    output only).
 3. **Local asset pipeline** — asset ingestion, metadata tagging, naive relevance ranking,

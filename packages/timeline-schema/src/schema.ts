@@ -94,20 +94,32 @@ export const TransitionRequirementSchema = z.object({
   triggeredBy: transitionTriggerEnum,
 });
 
+/**
+ * Content-understanding fields (contentType, topic, visualIntent, preferredMediaType,
+ * fallbackMediaType) are nullable/optional because Phase 1 (voice + script alignment) only
+ * populates id/index/text/startTime/endTime/alignmentConfidence/needsReview — later phases
+ * populate the rest. SentenceSchema is not embedded in TimelineSchema (Timeline is built from
+ * Scene, not Sentence), so relaxing these to optional does not affect TIMELINE_SCHEMA_VERSION
+ * or any existing Timeline consumer.
+ */
 export const SentenceSchema = z.object({
   id: z.string().min(1),
   index: z.number().int().nonnegative(),
   text: z.string().min(1),
   startTime: z.number().nonnegative(),
   endTime: z.number().nonnegative(),
-  contentType: contentTypeEnum,
-  topic: z.string().min(1),
+  contentType: contentTypeEnum.nullable().optional(),
+  topic: z.string().min(1).nullable().optional(),
   productSection: z.string().optional(),
-  visualIntent: VisualIntentSchema,
-  preferredMediaType: preferredMediaTypeEnum,
-  fallbackMediaType: preferredMediaTypeEnum,
+  visualIntent: VisualIntentSchema.nullable().optional(),
+  preferredMediaType: preferredMediaTypeEnum.nullable().optional(),
+  fallbackMediaType: preferredMediaTypeEnum.nullable().optional(),
   graphicsRequirement: GraphicsRequirementSchema.optional(),
   transitionRequirement: TransitionRequirementSchema.optional(),
+  /** 0-1 confidence from the script/voiceover alignment step (Phase 1). */
+  alignmentConfidence: z.number().min(0).max(1).optional(),
+  /** Set when alignment confidence is low or timings needed adjustment — surfaced to the UI. */
+  needsReview: z.boolean().optional(),
 });
 
 export const AssetUsageSchema = z.object({

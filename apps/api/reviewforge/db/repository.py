@@ -38,6 +38,20 @@ class ProjectRecord:
     product: ProductRecord
 
 
+@dataclass
+class JobRecord:
+    id: str
+    project_id: str
+    type: str
+    status: str
+    stage: Optional[str]
+    progress: int
+    created_at: str
+    updated_at: str
+    error: Optional[str]
+    result: Optional[dict]
+
+
 class ProjectRepository:
     def __init__(self, conn: sqlite3.Connection):
         self.conn = conn
@@ -106,8 +120,52 @@ class ProjectRepository:
         job_id = new_id()
         ts = now_iso()
         self.conn.execute(
-            "INSERT INTO job (id, project_id, type, status, created_at, updated_at) VALUES (?, ?, ?, 'pending', ?, ?)",
+            "INSERT INTO job (id, project_id, type, status, stage, progress, created_at, updated_at) "
+            "VALUES (?, ?, ?, 'pending', 'starting', 0, ?, ?)",
             (job_id, project_id, job_type, ts, ts),
         )
         self.conn.commit()
         return job_id
+
+    def update_job(
+        self,
+        job_id: str,
+        *,
+        status: Optional[str] = None,
+        stage: Optional[str] = None,
+        progress: Optional[int] = None,
+        error: Optional[str] = None,
+        result: Optional[dict] = None,
+    ) -> None:
+        fields = {"updated_at": now_iso()}
+        if status is not None:
+            fields["status"] = status
+        if stage is not None:
+            fields["stage"] = stage
+        if progress is not None:
+            fields["progress"] = progress
+        if error is not None:
+            fields["error"] = error
+        if result is not None:
+            fields["result"] = json.dumps(result)
+
+        set_clause = ", ".join(f"{col} = ?" for col in fields)
+        self.conn.execute(f"UPDATE job SET {set_clause} WHERE id = ?", (*fields.values(), job_id))
+        self.conn.commit()
+
+    def get_job(self, job_id: str) -> Optional[JobRecord]:
+        row = self.conn.execute("SELECT * FROM job WHERE id = ?", (job_id,)).fetchone()
+        if row is None:
+            return None
+        return JobRecord(
+            id=row["id"],
+            project_id=row["project_id"],
+            type=row["type"],
+            status=row["status"],
+            stage=row["stage"],
+            progress=row["progress"],
+            created_at=row["created_at"],
+            updated_at=row["updated_at"],
+            error=row["error"],
+            result=json.loads(row["result"]) if row["result"] else None,
+        )

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createProject, listProjects, ProjectSummary } from "../../lib/api";
+import { VoiceAnalysisControls } from "./VoiceAnalysisControls";
 
 const emptyForm = {
   name: "",
@@ -145,11 +146,14 @@ export function ProjectDashboard() {
         ) : (
           <ul className="project-list">
             {projects.map((p) => (
-              <li key={p.id}>
-                <span>
-                  {p.name} <span className="id">— {p.productName}</span>
-                </span>
-                <span className="id">{p.id}</span>
+              <li key={p.id} className="project-item">
+                <div className="project-item-header">
+                  <span>
+                    {p.name} <span className="id">— {p.productName}</span>
+                  </span>
+                  <span className="id">{p.id}</span>
+                </div>
+                <VoiceAnalysisControls projectId={p.id} />
               </li>
             ))}
           </ul>

@@ -134,8 +134,6 @@ button.primary:disabled {
 .project-list li {
   padding: 12px 0;
   border-bottom: 1px solid var(--border);
-  display: flex;
-  justify-content: space-between;
   font-size: 14px;
 }
 
@@ -143,9 +141,63 @@ button.primary:disabled {
   border-bottom: none;
 }
 
+.project-item-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
 .project-list .id {
   color: var(--text-dim);
   font-size: 12px;
+}
+
+button.secondary {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+button.secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.voice-analysis {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.voice-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.voice-summary div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.voice-summary dt {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.voice-summary dd {
+  margin: 0;
+  color: var(--text);
+  font-size: 13px;
 }
 
 .message {

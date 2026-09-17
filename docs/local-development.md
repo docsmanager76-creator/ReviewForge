@@ -79,6 +79,42 @@ cd apps/api
 pytest
 ```
 
+## 7. Voice + script analysis (Phase 1)
+
+Install the optional Whisper dependency (not required for the API, the frontend, or the test
+suite — only for running real transcription):
+
+```bash
+cd apps/api
+pip install -r requirements-whisper.txt
+```
+
+Then, once a project exists (created via the dashboard or the API), either:
+
+- **From the dashboard**: click "Analyze Voice" on the project's row and watch the progress
+  label; when it finishes, voice duration, sentence count, and alignment status appear inline.
+- **From the API**: `POST /projects/{project_id}/analyze/voice` returns a `jobId`; poll
+  `GET /jobs/{jobId}` until `status` is `succeeded`/`failed`.
+- **From the CLI** (fastest for debugging, no frontend needed):
+
+  ```bash
+  cd apps/api
+  python -m reviewforge.pipeline.analyze_voice <project-id>
+  ```
+
+All three produce `work/transcript.json` (raw Whisper output) and `work/sentences.json`
+(script sentences aligned to that audio, with `alignmentConfidence`/`needsReview` per
+sentence). The Whisper model is cached under `~/ReviewForgeData/models/` and is not
+re-downloaded on subsequent runs. Model size is configurable via `WHISPER_MODEL` (or
+`REVIEWFORGE_WHISPER_MODEL`) — `tiny`, `base`, or `small`; defaults to `base`.
+
+An optional integration test exercises the real Whisper backend (skipped by default since it
+needs the model download and `faster-whisper` installed):
+
+```bash
+REVIEWFORGE_RUN_WHISPER_INTEGRATION_TEST=1 pytest tests/test_whisper_integration.py
+```
+
 ## Configuration
 
 `apps/api/reviewforge/config.py` resolves settings in this order (highest wins):
@@ -92,7 +128,7 @@ environment variables → `~/ReviewForgeData/config.json` → built-in defaults.
 | Node path | `REVIEWFORGE_NODE_PATH` | `node` |
 | Python path | `REVIEWFORGE_PYTHON_PATH` | `python` |
 | Renderer dir | `REVIEWFORGE_RENDERER_DIR` | `packages/renderer` |
-| Whisper model | `REVIEWFORGE_WHISPER_MODEL` | `base` |
+| Whisper model | `REVIEWFORGE_WHISPER_MODEL` (or bare `WHISPER_MODEL`) | `base` |
 | Whisper device | `REVIEWFORGE_WHISPER_DEVICE` | `cpu` |
 | LLM provider | `REVIEWFORGE_LLM_PROVIDER` | `anthropic` |
 | LLM model | `REVIEWFORGE_LLM_MODEL` | `claude-sonnet-5` |
@@ -108,6 +144,7 @@ response.
 ~/ReviewForgeData/
   app.db                # SQLite: project, product, job tables — metadata only
   config.json            # non-secret settings
+  models/                # local Whisper model cache (faster-whisper download_root)
   projects/
     <project-id>/
       input/             # script, voiceover, product info as provided
@@ -115,7 +152,7 @@ response.
         images/
         video/
         graphics/
-      work/              # transcript.json, sentences.json, visual_plan.json (later phases)
+      work/              # transcript.json, sentences.json (visual_plan.json in a later phase)
       output/
         timeline.json
         final.mp4

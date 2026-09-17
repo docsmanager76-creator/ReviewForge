@@ -57,6 +57,12 @@ class Config:
         return self.data_dir / "config.json"
 
     @property
+    def models_dir(self) -> Path:
+        """Local Whisper model cache. faster-whisper/huggingface_hub will not re-download a
+        model that is already present here."""
+        return self.data_dir / "models"
+
+    @property
     def llm_api_key(self) -> str | None:
         """Read directly from the environment on every access; never cached to disk."""
         return os.environ.get("REVIEWFORGE_LLM_API_KEY")
@@ -96,7 +102,13 @@ def load_config() -> Config:
         python_path=os.environ.get("REVIEWFORGE_PYTHON_PATH", file_values.get("python_path", "python")),
         renderer_dir=os.environ.get("REVIEWFORGE_RENDERER_DIR", file_values.get("renderer_dir", "packages/renderer")),
         whisper=WhisperConfig(
-            model=os.environ.get("REVIEWFORGE_WHISPER_MODEL", whisper_values.get("model", "base")),
+            # REVIEWFORGE_WHISPER_MODEL is the namespaced form used elsewhere in this config
+            # system; bare WHISPER_MODEL is also accepted since it's the name most Whisper
+            # tooling documentation uses. The namespaced var wins if both are set.
+            model=os.environ.get(
+                "REVIEWFORGE_WHISPER_MODEL",
+                os.environ.get("WHISPER_MODEL", whisper_values.get("model", "base")),
+            ),
             device=os.environ.get("REVIEWFORGE_WHISPER_DEVICE", whisper_values.get("device", "cpu")),
         ),
         llm=LLMConfig(
@@ -110,5 +122,6 @@ def load_config() -> Config:
 def ensure_data_dirs(config: Config) -> None:
     config.data_dir.mkdir(parents=True, exist_ok=True)
     config.projects_dir.mkdir(parents=True, exist_ok=True)
+    config.models_dir.mkdir(parents=True, exist_ok=True)
     if not config.config_json_path.exists():
         config.config_json_path.write_text(json.dumps(config.to_public_dict(), indent=2), encoding="utf-8")

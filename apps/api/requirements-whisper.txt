@@ -1,0 +1,9 @@
+# Optional, heavier dependency for real local transcription. Not required to run the API,
+# the test suite, or the CLI against a fixture backend — only to actually run Whisper.
+#
+#   pip install -r requirements.txt -r requirements-whisper.txt
+#
+faster-whisper==1.0.3
+# faster-whisper 1.0.3 imports `requests` (via huggingface-hub's download path) without
+# declaring it as a direct dependency — pin it explicitly so a fresh install doesn't break.
+requests>=2.31.0

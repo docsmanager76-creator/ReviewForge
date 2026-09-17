@@ -72,3 +72,41 @@ export function createProject(input: CreateProjectInput) {
     body: JSON.stringify(input),
   });
 }
+
+export interface AnalyzeVoiceResponse {
+  jobId: string;
+  status: string;
+}
+
+export interface JobStatus {
+  id: string;
+  projectId: string;
+  type: string;
+  status: "pending" | "running" | "succeeded" | "failed";
+  stage: string | null;
+  progress: number;
+  error: string | null;
+  result: Record<string, unknown> | null;
+}
+
+export interface VoiceAnalysisSummary {
+  audioDuration: number;
+  sentenceCount: number;
+  needsReviewCount: number;
+  transcriptStatus: string;
+  alignmentStatus: string;
+}
+
+export function analyzeVoice(projectId: string) {
+  return request<AnalyzeVoiceResponse>(`/projects/${projectId}/analyze/voice`, {
+    method: "POST",
+  });
+}
+
+export function getJob(jobId: string) {
+  return request<JobStatus>(`/jobs/${jobId}`);
+}
+
+export function getVoiceAnalysis(projectId: string) {
+  return request<VoiceAnalysisSummary>(`/projects/${projectId}/voice-analysis`);
+}

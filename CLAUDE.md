@@ -53,7 +53,19 @@ docs/                       Architecture + local dev docs
 
 ## Current status
 
-Phase 0 (foundation) is complete: repo scaffolding, local API + dashboard, SQLite
-project/product/job tables, versioned timeline schema, a working Remotion test render, and
-FFmpeg detection. No AI pipeline step (Whisper, LLM sentence analysis, asset search/ranking)
-is implemented yet — see the phased roadmap in `docs/architecture.md` before adding one.
+Phase 0 (foundation) and Phase 1 (voice + script intelligence) are complete:
+
+- Phase 0: repo scaffolding, local API + dashboard, SQLite project/product/job tables,
+  versioned timeline schema, a working Remotion test render, FFmpeg detection.
+- Phase 1: local Whisper transcription (`apps/api/reviewforge/pipeline/whisper_backend.py`,
+  faster-whisper), script sentence parsing (`script_parser.py`), deterministic script↔Whisper
+  alignment (`alignment.py`, stdlib `difflib` — no LLM), timestamp validation
+  (`validation.py`), `POST /projects/{id}/analyze/voice` + `GET /jobs/{id}` +
+  `GET /projects/{id}/voice-analysis`, a CLI (`python -m reviewforge.pipeline.analyze_voice`),
+  and an "Analyze Voice" dashboard control.
+
+No LLM-based sentence understanding, visual planning, or asset search/ranking is implemented
+yet — sentences.json's content-understanding fields (contentType, topic, visualIntent,
+preferredMediaType, fallbackMediaType, graphicsRequirement, transitionRequirement) are still
+`null`, populated only in later phases. See the phased roadmap in `docs/architecture.md`
+before adding one.
