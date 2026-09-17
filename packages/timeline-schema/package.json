@@ -1,0 +1,18 @@
+{
+  "name": "@reviewforge/timeline-schema",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Versioned schema for Project/Sentence/VisualIntent/Asset/Scene/Timeline — the contract between the Python orchestration pipeline and the Remotion renderer.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "export-json-schema": "tsx scripts/export-json-schema.ts"
+  },
+  "dependencies": {
+    "@reviewforge/shared-types": "0.1.0",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0"
+  }
+}

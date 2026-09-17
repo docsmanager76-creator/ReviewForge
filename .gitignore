@@ -1,0 +1,24 @@
+node_modules/
+.next/
+dist/
+*.tsbuildinfo
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Local project data / config (never checked in — this is where real project files live)
+ReviewForgeData/
+
+# Renderer output
+packages/renderer/output/
+packages/renderer/dist/
+
+# Env files with local overrides
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,77 @@
+{
+  "version": "1.0",
+  "project": {
+    "id": "sample-project",
+    "title": "Sample Product Review",
+    "product": "Widget Pro",
+    "fps": 30,
+    "resolution": { "width": 1920, "height": 1080 }
+  },
+  "audio": {
+    "voiceoverPath": "sample/voiceover-placeholder.wav"
+  },
+  "scenes": [
+    {
+      "id": "scene-1",
+      "sentenceId": "sentence-1",
+      "startTime": 0,
+      "endTime": 3,
+      "visual": {
+        "type": "image",
+        "assetId": "asset-hero-01",
+        "filePath": "assets/images/hero.jpg",
+        "motionPreset": "slow_push_in"
+      },
+      "graphics": []
+    },
+    {
+      "id": "scene-2",
+      "sentenceId": "sentence-2",
+      "startTime": 3,
+      "endTime": 7,
+      "visual": {
+        "type": "image",
+        "assetId": "asset-feature-02",
+        "filePath": "assets/images/feature.jpg",
+        "motionPreset": "pan_left_to_right"
+      },
+      "graphics": [
+        {
+          "template": "feature_lower_third",
+          "fields": { "title": "12-hour battery life", "subtitle": "Feature highlight" },
+          "startTime": 3.5,
+          "endTime": 6.5
+        }
+      ]
+    },
+    {
+      "id": "scene-3",
+      "sentenceId": "sentence-3",
+      "startTime": 7,
+      "endTime": 10,
+      "visual": {
+        "type": "image",
+        "assetId": "asset-cta-03",
+        "filePath": "assets/images/cta.jpg",
+        "motionPreset": "controlled_scale"
+      },
+      "graphics": [
+        {
+          "template": "cta_lower_third",
+          "fields": { "title": "Link in the description below" },
+          "startTime": 7.5,
+          "endTime": 9.5
+        }
+      ],
+      "transitionOut": { "template": "shape_transition", "duration": 0.5 }
+    }
+  ],
+  "globalGraphics": {
+    "productIntro": {
+      "template": "product_intro",
+      "fields": { "productName": "Widget Pro", "brand": "Acme" },
+      "startTime": 0,
+      "endTime": 2
+    }
+  }
+}

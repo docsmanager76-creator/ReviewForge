@@ -1,0 +1,15 @@
+{
+  "name": "reviewforge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local-first AI video editor for YouTube product review videos.",
+  "workspaces": [
+    "apps/web",
+    "packages/timeline-schema",
+    "packages/shared-types",
+    "packages/renderer"
+  ],
+  "scripts": {
+    "export-schema": "npm run export-json-schema --workspace=@reviewforge/timeline-schema"
+  }
+}

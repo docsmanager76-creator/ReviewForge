@@ -1,0 +1,114 @@
+"""
+Local-first configuration for ReviewForge.
+
+Precedence (highest wins): environment variables > ReviewForgeData/config.json > defaults.
+Secrets (LLM API keys) are NEVER read from config.json and never written to disk by this
+module — they must be supplied as environment variables. config.json only ever holds paths
+and non-secret model/provider choices.
+"""
+from __future__ import annotations
+
+import json
+import os
+from dataclasses import dataclass, field, asdict
+from pathlib import Path
+
+
+def _default_data_dir() -> Path:
+    home = Path.home()
+    return home / "ReviewForgeData"
+
+
+@dataclass
+class WhisperConfig:
+    model: str = "base"
+    device: str = "cpu"
+
+
+@dataclass
+class LLMConfig:
+    provider: str = "anthropic"
+    model: str = "claude-sonnet-5"
+    # api_key is intentionally NOT a field here — it is read directly from the
+    # environment (see Config.llm_api_key) and must never be persisted to config.json.
+
+
+@dataclass
+class Config:
+    data_dir: Path
+    ffmpeg_path: str = "ffmpeg"
+    ffprobe_path: str = "ffprobe"
+    node_path: str = "node"
+    python_path: str = field(default_factory=lambda: os.environ.get("REVIEWFORGE_PYTHON_PATH", "python"))
+    renderer_dir: str = "packages/renderer"
+    whisper: WhisperConfig = field(default_factory=WhisperConfig)
+    llm: LLMConfig = field(default_factory=LLMConfig)
+
+    @property
+    def db_path(self) -> Path:
+        return self.data_dir / "app.db"
+
+    @property
+    def projects_dir(self) -> Path:
+        return self.data_dir / "projects"
+
+    @property
+    def config_json_path(self) -> Path:
+        return self.data_dir / "config.json"
+
+    @property
+    def llm_api_key(self) -> str | None:
+        """Read directly from the environment on every access; never cached to disk."""
+        return os.environ.get("REVIEWFORGE_LLM_API_KEY")
+
+    def project_dir(self, project_id: str) -> Path:
+        return self.projects_dir / project_id
+
+    def to_public_dict(self) -> dict:
+        """Serializable view used for config.json and API responses. Excludes secrets."""
+        d = asdict(self)
+        d["data_dir"] = str(self.data_dir)
+        d.pop("llm_api_key", None)
+        return d
+
+
+def _load_config_json(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return {}
+
+
+def load_config() -> Config:
+    data_dir = Path(os.environ.get("REVIEWFORGE_DATA_DIR", "")) if os.environ.get("REVIEWFORGE_DATA_DIR") else _default_data_dir()
+    file_values = _load_config_json(data_dir / "config.json")
+
+    whisper_values = file_values.get("whisper", {})
+    llm_values = file_values.get("llm", {})
+
+    config = Config(
+        data_dir=data_dir,
+        ffmpeg_path=os.environ.get("REVIEWFORGE_FFMPEG_PATH", file_values.get("ffmpeg_path", "ffmpeg")),
+        ffprobe_path=os.environ.get("REVIEWFORGE_FFPROBE_PATH", file_values.get("ffprobe_path", "ffprobe")),
+        node_path=os.environ.get("REVIEWFORGE_NODE_PATH", file_values.get("node_path", "node")),
+        python_path=os.environ.get("REVIEWFORGE_PYTHON_PATH", file_values.get("python_path", "python")),
+        renderer_dir=os.environ.get("REVIEWFORGE_RENDERER_DIR", file_values.get("renderer_dir", "packages/renderer")),
+        whisper=WhisperConfig(
+            model=os.environ.get("REVIEWFORGE_WHISPER_MODEL", whisper_values.get("model", "base")),
+            device=os.environ.get("REVIEWFORGE_WHISPER_DEVICE", whisper_values.get("device", "cpu")),
+        ),
+        llm=LLMConfig(
+            provider=os.environ.get("REVIEWFORGE_LLM_PROVIDER", llm_values.get("provider", "anthropic")),
+            model=os.environ.get("REVIEWFORGE_LLM_MODEL", llm_values.get("model", "claude-sonnet-5")),
+        ),
+    )
+    return config
+
+
+def ensure_data_dirs(config: Config) -> None:
+    config.data_dir.mkdir(parents=True, exist_ok=True)
+    config.projects_dir.mkdir(parents=True, exist_ok=True)
+    if not config.config_json_path.exists():
+        config.config_json_path.write_text(json.dumps(config.to_public_dict(), indent=2), encoding="utf-8")

@@ -1,0 +1,20 @@
+{
+  "name": "@reviewforge/renderer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Deterministic Remotion renderer. Consumes a validated Timeline JSON produced by the Python backend and renders the final MP4. Never calls an LLM or makes creative decisions.",
+  "scripts": {
+    "render:sample": "remotion render src/index.ts TimelineComposition output/sample.mp4 --props=sample/timeline.sample.json"
+  },
+  "dependencies": {
+    "@reviewforge/timeline-schema": "0.1.0",
+    "@remotion/cli": "^4.0.525",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "remotion": "^4.0.525"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0",
+    "typescript": "^5.5.0"
+  }
+}
