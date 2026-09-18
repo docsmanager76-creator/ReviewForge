@@ -44,7 +44,7 @@ _NATIVE_DIALOG_TIMEOUT_SECONDS = 300  # user may sit in the dialog for a while
 _POWERSHELL_FOLDER_DIALOG_SCRIPT = """
 Add-Type -AssemblyName System.Windows.Forms | Out-Null
 $dialog = New-Object System.Windows.Forms.FolderBrowserDialog
-$dialog.Description = 'Select the ReviewForgeData folder'
+$dialog.Description = 'Select the ReviewForge data folder'
 if (-not [string]::IsNullOrWhiteSpace($env:REVIEWFORGE_INITIAL_PATH)) {
     $dialog.SelectedPath = $env:REVIEWFORGE_INITIAL_PATH
 }

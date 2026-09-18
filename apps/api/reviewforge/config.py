@@ -1,24 +1,35 @@
 """
 Local-first configuration for ReviewForge.
 
-Precedence (highest wins): environment variables > ReviewForgeData/config.json > defaults.
-Secrets (LLM API keys) are NEVER read from config.json and never written to disk by this
-module — they must be supplied as environment variables. config.json only ever holds paths
-and non-secret model/provider choices.
+Precedence (highest wins): environment variables > the data directory's own config.json >
+defaults. Secrets (LLM API keys) are NEVER read from config.json and never written to disk by
+this module — they must be supplied as environment variables. config.json only ever holds
+paths and non-secret model/provider choices. See _resolve_data_dir() below for how the data
+directory *itself* is found, which is a separate, earlier resolution step.
 """
 from __future__ import annotations
 
 import json
 import os
+import platform
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
 
 from . import settings_store
 
+# The recommended/default location on Windows. Deliberately NOT under the user's home
+# directory and NOT named "ReviewForgeData" — this is a fixed, easy-to-find root the app
+# recommends out of the box; users remain free to point Settings -> Storage & Data (or
+# REVIEWFORGE_DATA_DIR) at any other drive/folder instead.
+WINDOWS_DEFAULT_DATA_DIR = "F:/ReviewForge"
+
 
 def _default_data_dir() -> Path:
-    home = Path.home()
-    return home / "ReviewForgeData"
+    if platform.system() == "Windows":
+        return Path(WINDOWS_DEFAULT_DATA_DIR)
+    # Non-Windows (dev sandbox, CI, macOS/Linux use): a drive letter default makes no sense,
+    # so fall back to a home-relative folder as before.
+    return Path.home() / "ReviewForgeData"
 
 
 @dataclass
@@ -94,9 +105,9 @@ def _load_config_json(path: Path) -> dict:
 
 def _resolve_data_dir() -> tuple[Path, str]:
     """Precedence: REVIEWFORGE_DATA_DIR env var (dev override) > the path saved via the
-    Settings UI (~/.reviewforge/settings.json) > the built-in default. The env var wins
-    unconditionally so a developer's explicit override is never silently shadowed by a
-    previously-saved UI choice."""
+    Settings UI (~/.reviewforge/settings.json) > the built-in default (F:/ReviewForge on
+    Windows; see WINDOWS_DEFAULT_DATA_DIR). The env var wins unconditionally so a developer's
+    explicit override is never silently shadowed by a previously-saved UI choice."""
     env_value = os.environ.get("REVIEWFORGE_DATA_DIR")
     if env_value:
         return Path(env_value), "env"

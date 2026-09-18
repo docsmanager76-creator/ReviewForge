@@ -2,8 +2,9 @@
 Local Whisper-compatible transcription backend.
 
 Audio never leaves the machine: the real backend (FasterWhisperBackend) runs
-faster-whisper in-process against a local model cache under
-ReviewForgeData/models/, and faster-whisper itself is only imported lazily inside
+faster-whisper in-process against a local model cache under the configured data
+directory's models/ subfolder (e.g. F:/ReviewForge/models/ on the recommended Windows
+default), and faster-whisper itself is only imported lazily inside
 _load_model() so that importing this module — and running the rest of the test suite —
 never requires the (optional, heavy) faster-whisper package to be installed.
 

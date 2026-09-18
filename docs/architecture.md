@@ -74,9 +74,12 @@ only ever sees a resolved `absolutePath` and does not care how it was obtained.
 location is user-chosen, something outside it must remember that choice. A small pointer file
 at `~/.reviewforge/settings.json` (written by `PUT /settings/data-dir`) does exactly that and
 nothing else. Precedence, highest wins: `REVIEWFORGE_DATA_DIR` env var (dev override) → the
-saved pointer (the normal UI path, via Settings → "Storage & Data") → the built-in default
-(`~/ReviewForgeData`). Changing the folder in the UI does not migrate existing projects — it
-starts fresh at the new location.
+saved pointer (the normal UI path, via Settings → "Storage & Data") → the built-in default —
+**`F:\ReviewForge` on Windows** (`config.py`'s `WINDOWS_DEFAULT_DATA_DIR`; deliberately not
+`D:\ReviewForgeData`, `F:\ReviewForgeData`, or anywhere under `C:\Users\...`), or
+`~/ReviewForgeData` on non-Windows dev/CI machines, where a drive-letter default doesn't
+apply. Changing the folder in the UI does not migrate existing projects — it starts fresh at
+the new location.
 
 "Choose Folder" tries a real native Windows folder dialog first (the backend shells out to
 PowerShell's `FolderBrowserDialog` — this only works because the backend and browser run on

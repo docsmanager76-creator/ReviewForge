@@ -22,7 +22,7 @@ ReviewForge is a **local-first** AI video editor for YouTube product review vide
    — this is a single-user local tool.
 4. **No secrets on disk.** `apps/api/reviewforge/config.py` reads the LLM API key only from
    the `REVIEWFORGE_LLM_API_KEY` environment variable. Never add a code path that writes an
-   API key to `config.json` or anywhere else in `~/ReviewForgeData/`.
+   API key to `config.json` or anywhere else in the data directory.
 5. **FileReference, not bare paths.** Frontend → backend file inputs go through the
    `FileReference` abstraction (`packages/shared-types/src/fileReference.ts`,
    `apps/api/reviewforge/models/file_reference.py`) so a future native file picker or desktop
@@ -67,10 +67,14 @@ Phase 0 (foundation) and Phase 1 (voice + script intelligence) are complete:
   and an "Analyze Voice" dashboard control.
 
 Also since Phase 1: a Settings UI (`/settings`, "Storage & Data") lets the user choose the
-`ReviewForgeData` location without touching a terminal (`GET/PUT /settings`,
+data directory location without touching a terminal (`GET/PUT /settings`,
 `GET /settings/browse`, `POST /settings/browse-native`), backed by a pointer file at
 `~/.reviewforge/settings.json` (env var `REVIEWFORGE_DATA_DIR` still wins over it — see
-`config.py`'s `_resolve_data_dir`). Create Project uploads files instead of requiring typed
+`config.py`'s `_resolve_data_dir`). The recommended/default location on Windows is
+`F:\ReviewForge` (`config.py`'s `WINDOWS_DEFAULT_DATA_DIR`) — deliberately not
+`D:\ReviewForgeData`, `F:\ReviewForgeData`, or a path under `C:\Users\...`; non-Windows
+(dev/CI) keeps the `~/ReviewForgeData` home-relative default since a drive-letter default
+makes no sense there. Create Project uploads files instead of requiring typed
 paths (`POST /projects/with-files`); the original typed-path `POST /projects` still exists for
 programmatic/CLI use and is what the test suite exercises.
 

@@ -43,8 +43,11 @@ uvicorn reviewforge.main:app --reload --port 8000
 ```
 
 - Health check: `curl http://127.0.0.1:8000/health`
-- On first run this creates `~/ReviewForgeData/` (override with the `REVIEWFORGE_DATA_DIR`
-  env var) containing `app.db`, `config.json`, and `projects/`.
+- On first run this creates the data directory automatically, containing `app.db`,
+  `config.json`, `models/`, and `projects/`. The recommended default on Windows is
+  `F:\ReviewForge`; on non-Windows dev machines it's `~/ReviewForgeData`. Override with the
+  `REVIEWFORGE_DATA_DIR` env var, or (the normal end-user way) Settings → "Storage & Data" in
+  the dashboard — see section 8 below.
 
 ## 4. Run the frontend
 
@@ -108,8 +111,9 @@ Then, once a project exists (created via the dashboard or the API), either:
 
 All three produce `work/transcript.json` (raw Whisper output) and `work/sentences.json`
 (script sentences aligned to that audio, with `alignmentConfidence`/`needsReview` per
-sentence). The Whisper model is cached under `~/ReviewForgeData/models/` and is not
-re-downloaded on subsequent runs. Model size is configurable via `WHISPER_MODEL` (or
+sentence). The Whisper model is cached under the data directory's `models/` subfolder (e.g.
+`F:\ReviewForge\models\` on Windows) and is not re-downloaded on subsequent runs. Model size
+is configurable via `WHISPER_MODEL` (or
 `REVIEWFORGE_WHISPER_MODEL`) — `tiny`, `base`, or `small`; defaults to `base`.
 
 ## 8. Choosing where ReviewForge stores its data
@@ -137,11 +141,14 @@ REVIEWFORGE_RUN_WHISPER_INTEGRATION_TEST=1 pytest tests/test_whisper_integration
 ## Configuration
 
 `apps/api/reviewforge/config.py` resolves settings in this order (highest wins):
-environment variables → `~/ReviewForgeData/config.json` → built-in defaults.
+environment variables → the data directory's own config.json → built-in defaults. The data
+directory itself resolves separately and earlier (see "Choosing where ReviewForge stores its
+data" above): `REVIEWFORGE_DATA_DIR` env var → the path saved via Settings → the built-in
+default (`F:\ReviewForge` on Windows, `~/ReviewForgeData` elsewhere).
 
 | Setting | Env var | Default |
 |---|---|---|
-| Data directory | `REVIEWFORGE_DATA_DIR` | `~/ReviewForgeData` |
+| Data directory | `REVIEWFORGE_DATA_DIR` | `F:\ReviewForge` (Windows) / `~/ReviewForgeData` (other) |
 | FFmpeg path | `REVIEWFORGE_FFMPEG_PATH` | `ffmpeg` (from `PATH`) |
 | FFprobe path | `REVIEWFORGE_FFPROBE_PATH` | `ffprobe` (from `PATH`) |
 | Node path | `REVIEWFORGE_NODE_PATH` | `node` |
@@ -159,20 +166,24 @@ response.
 
 ## Project data layout
 
+On the recommended Windows default (`F:\ReviewForge`; non-Windows dev machines use
+`~/ReviewForgeData` with the same structure):
+
 ```
-~/ReviewForgeData/
-  app.db                # SQLite: project, product, job tables — metadata only
+F:\ReviewForge\
+  app.db                 # SQLite: project, product, job tables — metadata only
   config.json            # non-secret settings
-  models/                # local Whisper model cache (faster-whisper download_root)
-  projects/
-    <project-id>/
-      input/             # script, voiceover, product info as provided
-      assets/
-        images/
-        video/
-        graphics/
-      work/              # transcript.json, sentences.json (visual_plan.json in a later phase)
-      output/
+  models\                # local Whisper model cache (faster-whisper download_root)
+  projects\
+    <project-id>\
+      input\             # script, voiceover, product info — via upload or typed path
+      assets\
+        images\
+        video\
+        graphics\
+      work\              # transcript.json, sentences.json (visual_plan.json in a later phase)
+      output\
         timeline.json
         final.mp4
+      reports\           # quality-control reports (a later phase)
 ```

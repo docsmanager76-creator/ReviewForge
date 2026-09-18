@@ -121,7 +121,7 @@ export function StorageSettings() {
             id="dataDirInput"
             value={pathInput}
             onChange={(e) => setPathInput(e.target.value)}
-            placeholder="D:\ReviewForgeData"
+            placeholder="F:\ReviewForge"
           />
           <button className="secondary" onClick={handleChooseFolder} disabled={saving}>
             Choose Folder…

@@ -35,12 +35,18 @@ def resolve_local_path(value: str) -> FileReference:
 def store_uploaded_file(destination: Path, original_filename: Optional[str], content: bytes) -> FileReference:
     """Writes browser-uploaded file content to `destination` (an exact path chosen by the
     caller, inside the project's input/ folder) and returns a FileReference recording that
-    this file arrived via browser upload, not a typed path."""
+    this file arrived via browser upload, not a typed path.
+
+    Deliberately does NOT call .resolve() here: `destination` is already built from the
+    configured (absolute) data directory, and resolving it would make the result depend on
+    the process's current working directory whenever the interpreter's path flavor doesn't
+    recognize the data directory as absolute (e.g. a Windows-style "F:/..." path evaluated
+    under a POSIX path implementation) — silently producing a path under the wrong root."""
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_bytes(content)
     return FileReference(
         source="browser_upload",
-        absolutePath=str(destination.resolve()),
+        absolutePath=str(destination),
         originalValue=original_filename,
         displayName=original_filename,
     )

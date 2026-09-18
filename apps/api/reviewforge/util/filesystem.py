@@ -1,6 +1,7 @@
 """Local project directory management. Every project gets a self-contained folder tree under
-ReviewForgeData/projects/<project-id>/ so a project can be backed up or moved independently of
-the ReviewForge codebase."""
+<data-dir>/projects/<project-id>/ (e.g. F:\\ReviewForge\\projects\\<project-id>\\ on the
+recommended Windows default) so a project can be backed up or moved independently of the
+ReviewForge codebase."""
 from __future__ import annotations
 
 import shutil
