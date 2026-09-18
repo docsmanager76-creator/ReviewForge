@@ -212,3 +212,126 @@ button.secondary:disabled {
 .message.success {
   color: var(--success);
 }
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.nav-link {
+  font-size: 13px;
+  color: var(--text-dim);
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 12px;
+}
+
+.nav-link:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 0 0 20px;
+}
+
+.settings-grid dt {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+
+.settings-grid dd {
+  margin: 0;
+  font-size: 14px;
+  word-break: break-all;
+}
+
+.row-inline {
+  display: flex;
+  gap: 8px;
+}
+
+.row-inline input {
+  flex: 1;
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin: 8px 0 0;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  width: 420px;
+  max-width: 90vw;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.modal-path {
+  font-size: 12px;
+  color: var(--text-dim);
+  word-break: break-all;
+  margin: 0 0 12px;
+}
+
+.folder-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.folder-entry {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.folder-entry:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}

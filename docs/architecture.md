@@ -52,18 +52,39 @@ The frontend never hands the pipeline a bare string path. It hands a `FileRefere
 
 ```ts
 interface FileReference {
-  source: "local_path" | "native_picker" | "desktop_wrapper";
+  source: "local_path" | "browser_upload" | "native_picker" | "desktop_wrapper";
   absolutePath: string;
   originalValue?: string;
   displayName?: string;
 }
 ```
 
-Phase 0 only produces `source: "local_path"` (a typed path resolved to an absolute path by
-the API). A native file-picker dialog or a desktop wrapper (Electron, Tauri) can be added
-later purely as new *sources* — every downstream consumer (project storage, timeline
-builder, renderer) only ever sees a resolved `absolutePath` and does not care how it was
-obtained.
+Phase 0 produced only `source: "local_path"` (a typed path resolved to an absolute path by
+the API). The normal Create Project workflow now uses `source: "browser_upload"`: the browser
+reads a selected file's bytes via `<input type="file">` (the only thing a website is ever
+allowed to get from a file picker — never an OS path) and uploads them to
+`POST /projects/with-files`, which writes them into that project's own `input/` folder. A
+native file-picker dialog or a desktop wrapper (Electron, Tauri) can be added later purely as
+another *source* — every downstream consumer (project storage, timeline builder, renderer)
+only ever sees a resolved `absolutePath` and does not care how it was obtained.
+
+## Choosing the data directory (Settings UI)
+
+`config.json` normally lives *inside* the data directory — but if the data directory's own
+location is user-chosen, something outside it must remember that choice. A small pointer file
+at `~/.reviewforge/settings.json` (written by `PUT /settings/data-dir`) does exactly that and
+nothing else. Precedence, highest wins: `REVIEWFORGE_DATA_DIR` env var (dev override) → the
+saved pointer (the normal UI path, via Settings → "Storage & Data") → the built-in default
+(`~/ReviewForgeData`). Changing the folder in the UI does not migrate existing projects — it
+starts fresh at the new location.
+
+"Choose Folder" tries a real native Windows folder dialog first (the backend shells out to
+PowerShell's `FolderBrowserDialog` — this only works because the backend and browser run on
+the same physical machine, which is the whole point of local-first) and falls back to an
+in-app, backend-driven directory browser (`GET /settings/browse`) when that's unavailable
+(non-Windows, no interactive desktop session, no PowerShell). Browser JavaScript itself never
+gets filesystem access — see `apps/api/reviewforge/util/folder_picker.py` for the full
+reasoning.
 
 ## Communication
 

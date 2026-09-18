@@ -57,7 +57,7 @@ const transitionTemplateEnum = z.enum(["shape_transition", "cut", "cross_dissolv
 const transitionTriggerEnum = z.enum(["new_product_section", "manual"]);
 
 export const FileReferenceSchema = z.object({
-  source: z.enum(["local_path", "native_picker", "desktop_wrapper"]),
+  source: z.enum(["local_path", "browser_upload", "native_picker", "desktop_wrapper"]),
   absolutePath: z.string().min(1),
   originalValue: z.string().optional(),
   displayName: z.string().optional(),

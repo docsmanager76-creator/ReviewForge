@@ -86,6 +86,16 @@ class ProjectRepository:
 
         return self.get_project(project_id)  # type: ignore[return-value]
 
+    def update_project_paths(self, project_id: str, script_path: str, voiceover_path: str) -> None:
+        """Used by the file-upload Create Project flow: the project row is created first (to
+        get its id and thus its directory), then updated with the real paths once the
+        uploaded files have been written into that project's input/ folder."""
+        self.conn.execute(
+            "UPDATE project SET script_path = ?, voiceover_path = ? WHERE id = ?",
+            (script_path, voiceover_path, project_id),
+        )
+        self.conn.commit()
+
     def get_project(self, project_id: str) -> Optional[ProjectRecord]:
         row = self.conn.execute("SELECT * FROM project WHERE id = ?", (project_id,)).fetchone()
         if row is None:

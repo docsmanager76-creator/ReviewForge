@@ -26,7 +26,9 @@ ReviewForge is a **local-first** AI video editor for YouTube product review vide
 5. **FileReference, not bare paths.** Frontend → backend file inputs go through the
    `FileReference` abstraction (`packages/shared-types/src/fileReference.ts`,
    `apps/api/reviewforge/models/file_reference.py`) so a future native file picker or desktop
-   wrapper can be added without touching pipeline code.
+   wrapper can be added without touching pipeline code. The normal Create Project flow uses
+   the `browser_upload` source (`POST /projects/with-files`) — never assume the frontend can
+   read or send an OS path; a browser can only ever hand over file *content*.
 6. **Schema changes are versioned.** Any breaking change to
    `packages/timeline-schema/src/schema.ts` must bump `TIMELINE_SCHEMA_VERSION`'s major
    component and re-run `npm run export-schema`.
@@ -63,6 +65,14 @@ Phase 0 (foundation) and Phase 1 (voice + script intelligence) are complete:
   (`validation.py`), `POST /projects/{id}/analyze/voice` + `GET /jobs/{id}` +
   `GET /projects/{id}/voice-analysis`, a CLI (`python -m reviewforge.pipeline.analyze_voice`),
   and an "Analyze Voice" dashboard control.
+
+Also since Phase 1: a Settings UI (`/settings`, "Storage & Data") lets the user choose the
+`ReviewForgeData` location without touching a terminal (`GET/PUT /settings`,
+`GET /settings/browse`, `POST /settings/browse-native`), backed by a pointer file at
+`~/.reviewforge/settings.json` (env var `REVIEWFORGE_DATA_DIR` still wins over it — see
+`config.py`'s `_resolve_data_dir`). Create Project uploads files instead of requiring typed
+paths (`POST /projects/with-files`); the original typed-path `POST /projects` still exists for
+programmatic/CLI use and is what the test suite exercises.
 
 No LLM-based sentence understanding, visual planning, or asset search/ranking is implemented
 yet — sentences.json's content-understanding fields (contentType, topic, visualIntent,

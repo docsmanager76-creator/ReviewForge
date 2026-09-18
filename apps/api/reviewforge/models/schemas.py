@@ -27,6 +27,7 @@ class ProjectDirectories(BaseModel):
     assets: str
     work: str
     output: str
+    reports: str
 
 
 class ProjectSummary(BaseModel):
@@ -71,3 +72,43 @@ class VoiceAnalysisSummary(BaseModel):
     needsReviewCount: int
     transcriptStatus: str
     alignmentStatus: str
+
+
+class StorageStatus(BaseModel):
+    exists: bool
+    writable: bool
+    freeBytes: Optional[int] = None
+    totalBytes: Optional[int] = None
+
+
+class SettingsResponse(BaseModel):
+    dataDir: str
+    dataDirSource: str  # "env" | "saved" | "default"
+    projectsDir: str
+    modelsDir: str
+    status: StorageStatus
+
+
+class UpdateDataDirRequest(BaseModel):
+    path: str
+
+
+class DirectoryEntryResponse(BaseModel):
+    name: str
+    path: str
+
+
+class DirectoryListingResponse(BaseModel):
+    path: Optional[str] = None
+    parent: Optional[str] = None
+    entries: List[DirectoryEntryResponse]
+
+
+class NativeFolderPickerRequest(BaseModel):
+    initialPath: Optional[str] = None
+
+
+class NativeFolderPickerResponse(BaseModel):
+    available: bool
+    path: Optional[str] = None
+    message: Optional[str] = None

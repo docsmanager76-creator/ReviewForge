@@ -13,6 +13,8 @@ import os
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
 
+from . import settings_store
+
 
 def _default_data_dir() -> Path:
     home = Path.home()
@@ -36,6 +38,9 @@ class LLMConfig:
 @dataclass
 class Config:
     data_dir: Path
+    # Where data_dir's value came from — surfaced in the Settings UI so the user understands
+    # why changing it in the UI might have no effect (an env var override always wins).
+    data_dir_source: str = "default"
     ffmpeg_path: str = "ffmpeg"
     ffprobe_path: str = "ffprobe"
     node_path: str = "node"
@@ -87,8 +92,24 @@ def _load_config_json(path: Path) -> dict:
         return {}
 
 
+def _resolve_data_dir() -> tuple[Path, str]:
+    """Precedence: REVIEWFORGE_DATA_DIR env var (dev override) > the path saved via the
+    Settings UI (~/.reviewforge/settings.json) > the built-in default. The env var wins
+    unconditionally so a developer's explicit override is never silently shadowed by a
+    previously-saved UI choice."""
+    env_value = os.environ.get("REVIEWFORGE_DATA_DIR")
+    if env_value:
+        return Path(env_value), "env"
+
+    saved = settings_store.read_saved_data_dir()
+    if saved is not None:
+        return saved, "saved"
+
+    return _default_data_dir(), "default"
+
+
 def load_config() -> Config:
-    data_dir = Path(os.environ.get("REVIEWFORGE_DATA_DIR", "")) if os.environ.get("REVIEWFORGE_DATA_DIR") else _default_data_dir()
+    data_dir, data_dir_source = _resolve_data_dir()
     file_values = _load_config_json(data_dir / "config.json")
 
     whisper_values = file_values.get("whisper", {})
@@ -96,6 +117,7 @@ def load_config() -> Config:
 
     config = Config(
         data_dir=data_dir,
+        data_dir_source=data_dir_source,
         ffmpeg_path=os.environ.get("REVIEWFORGE_FFMPEG_PATH", file_values.get("ffmpeg_path", "ffmpeg")),
         ffprobe_path=os.environ.get("REVIEWFORGE_FFPROBE_PATH", file_values.get("ffprobe_path", "ffprobe")),
         node_path=os.environ.get("REVIEWFORGE_NODE_PATH", file_values.get("node_path", "node")),

@@ -55,7 +55,11 @@ npm run dev
 ```
 
 Open http://127.0.0.1:3000 — you should see the ReviewForge dashboard with an "API
-connected" pill and the project creation form.
+connected" pill and the Create Project form. Creating a project only ever needs you to click
+"Select Script File" / "Select Voiceover File" — no path typing required. Visit
+http://127.0.0.1:3000/settings ("Storage & Data") to see or change where ReviewForge stores
+its data; "Choose Folder" opens a native Windows dialog when available, or an in-app folder
+browser otherwise.
 
 ## 5. Run the Remotion test render
 
@@ -107,6 +111,21 @@ All three produce `work/transcript.json` (raw Whisper output) and `work/sentence
 sentence). The Whisper model is cached under `~/ReviewForgeData/models/` and is not
 re-downloaded on subsequent runs. Model size is configurable via `WHISPER_MODEL` (or
 `REVIEWFORGE_WHISPER_MODEL`) — `tiny`, `base`, or `small`; defaults to `base`.
+
+## 8. Choosing where ReviewForge stores its data
+
+No PowerShell needed for this either: open **Settings → Storage & Data** in the dashboard.
+It shows the current data/projects/models directories and storage status, and lets you change
+the data directory two ways:
+
+- **Choose Folder…** — tries a real native Windows folder dialog (works when running on
+  Windows with an interactive desktop session); falls back automatically to an in-app folder
+  browser everywhere else (e.g. this dev sandbox).
+- **Type a path directly** into the field and click Save.
+
+`REVIEWFORGE_DATA_DIR` still works exactly as before and always wins over whatever is saved
+in Settings — useful for tests and CI, where you want a fully isolated, disposable location
+regardless of what a developer's machine has configured.
 
 An optional integration test exercises the real Whisper backend (skipped by default since it
 needs the model download and `faster-whisper` installed):
